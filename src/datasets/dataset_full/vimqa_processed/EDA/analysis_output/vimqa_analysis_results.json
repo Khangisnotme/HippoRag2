@@ -1,0 +1,188 @@
+{
+  "basic_stats": {
+    "total_questions": 300,
+    "avg_question_length": 13.196666666666667,
+    "min_question_length": 3,
+    "max_question_length": 39,
+    "std_question_length": 5.598034377251437,
+    "avg_answer_length": 4.6033333333333335,
+    "min_answer_length": 1,
+    "max_answer_length": 52,
+    "std_answer_length": 6.807299187065471,
+    "avg_supporting_facts": 1.71,
+    "min_supporting_facts": 1,
+    "max_supporting_facts": 3,
+    "avg_context_count": 10.0,
+    "supporting_facts_distribution": {
+      "2": 193,
+      "1": 97,
+      "3": 10
+    }
+  },
+  "question_types": {
+    "Yes/No": 98,
+    "Other": 163,
+    "When": 16,
+    "Where": 10,
+    "What": 10,
+    "Who": 3
+  },
+  "answer_types": {
+    "Yes/No": 98,
+    "Long Answer": 86,
+    "Date/Time": 17,
+    "Short Phrase": 66,
+    "Number": 25,
+    "Single Word": 8
+  },
+  "domains": {
+    "unique_titles": 1431,
+    "top_titles": {
+      "Danh sách Tổng thống Hoa Kỳ": 60,
+      "Thảo My": 54,
+      "PH": 35,
+      "Nhiệt kế": 35,
+      "Cô gái lắm chiêu": 25,
+      "Queens Park Rangers F.C.": 19,
+      "Hải cẩu": 18,
+      "Nhà Chu": 17,
+      "Chelsea F.C.": 15,
+      "UEFA Champions League": 14,
+      "Bao Công": 12,
+      "Mohamed ElBaradei": 11,
+      "Ai Cập cổ đại": 11,
+      "Tottenham Hotspur F.C.": 10,
+      "Newcastle United F.C.": 10,
+      "Sunderland A.F.C.": 10,
+      "West Bromwich Albion F.C.": 10,
+      "Giải Nobel": 10,
+      "Gamal Abdel Nasser": 10,
+      "Southampton F.C.": 9
+    },
+    "question_domain_distribution": {
+      "Khác": 277,
+      "Khoa học/Công nghệ": 1,
+      "Thể thao": 14,
+      "Chính trị/Lịch sử": 4,
+      "Địa lý/Tự nhiên": 1,
+      "Nhân vật": 1,
+      "Giải trí/Nghệ thuật": 1,
+      "Giải thưởng": 1
+    },
+    "title_domain_distribution": {
+      "Nhân vật": 56,
+      "Khác": 2381,
+      "Chính trị/Lịch sử": 126,
+      "Khoa học/Công nghệ": 60,
+      "Địa lý/Tự nhiên": 33,
+      "Giải trí/Nghệ thuật": 63,
+      "Thể thao": 250,
+      "Giải thưởng": 31
+    }
+  },
+  "types": {
+    "bridge": 300
+  },
+  "multihop_reasoning": {
+    "Bridge entity (2-hop)": 190,
+    "Single-hop": 97,
+    "Complex (3+ hop)": 10,
+    "Multiple properties (2-hop)": 3
+  },
+  "rag_kg_suitability": {
+    "bridge_entity_ratio": 0.6333333333333333,
+    "multihop_ratio": 0.6766666666666666,
+    "domain_diversity": 8,
+    "suitability_score": 7.563333333333333,
+    "assessment": "Phù hợp"
+  },
+  "examples": [
+    {
+      "id": "aebce1bf-35a3-4e0c-85c1-e59b24dfb48b",
+      "question": "Diego Maradona nhỏ tuổi hơn Rutherford B. Hayes phải không?",
+      "answer": "đúng",
+      "supporting_facts": [
+        [
+          "Diego Maradona",
+          0
+        ],
+        [
+          "Rutherford B. Hayes",
+          0
+        ]
+      ],
+      "type": "bridge",
+      "question_type": "Yes/No",
+      "multihop_type": "Bridge entity (2-hop)",
+      "domain": "Khác"
+    },
+    {
+      "id": "9fea6098-898a-44cf-b264-273da86bd0ec",
+      "question": "Tên núi Lang Biang ở Lạc Dương, Lâm Đồng được giải thích bằng huyền thoại nào",
+      "answer": "chàng K’lang và nàng H'biang",
+      "supporting_facts": [
+        [
+          "Đỉnh Langbiang",
+          13
+        ]
+      ],
+      "type": "bridge",
+      "question_type": "Other",
+      "multihop_type": "Single-hop",
+      "domain": "Khác"
+    },
+    {
+      "id": "375cc719-f24b-40c2-b15d-bb502571e68d",
+      "question": "Album phòng thu đầu tay của Billie Eilish được phát hành vào ngày nào?",
+      "answer": "ngày 29 tháng 3 năm 2019 ",
+      "supporting_facts": [
+        [
+          "Billie Eilish",
+          4
+        ],
+        [
+          "When We All Fall Asleep, Where Do We Go?",
+          2
+        ]
+      ],
+      "type": "bridge",
+      "question_type": "When",
+      "multihop_type": "Bridge entity (2-hop)",
+      "domain": "Khác"
+    },
+    {
+      "id": "90740350-557e-4cde-a7e2-7505c2c8bfa2",
+      "question": "Spin-off dành cho người lớn của Ecstasy năm 2010 là trò chơi thứ mấy trong lịch sử phát hành của Key?",
+      "answer": "thứ tám",
+      "supporting_facts": [
+        [
+          "Little Busters!",
+          14
+        ],
+        [
+          "Kud Wafter",
+          1
+        ]
+      ],
+      "type": "bridge",
+      "question_type": "Other",
+      "multihop_type": "Bridge entity (2-hop)",
+      "domain": "Khác"
+    },
+    {
+      "id": "e1b59ed8-5f3d-477d-9448-82378b0a6ffe",
+      "question": "Triều Tiên nằm ở khu vực nào",
+      "answer": "Triều Tiên nằm trên bán đảo Triều Tiên tại đông bắc châu Á.",
+      "supporting_facts": [
+        [
+          "Triều Tiên",
+          0
+        ]
+      ],
+      "type": "bridge",
+      "question_type": "Other",
+      "multihop_type": "Single-hop",
+      "domain": "Khác"
+    }
+  ]
+}

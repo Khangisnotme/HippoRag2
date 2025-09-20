@@ -1,0 +1,114 @@
+{
+  "execution_time": 11593.078285694122,
+  "timestamp": "2025-05-31T17:52:19.944855",
+  "input_file": "corpus_vimqa_dev_300.xlsx",
+  "pipeline_style": "HippoRAG_2_with_GPT_Fallback",
+  "canonical_mapping": false,
+  "gpt_fallback_enabled": true,
+  "excel_processing": {
+    "total_documents": 3000,
+    "avg_text_length": 495.94533333333334,
+    "min_text_length": 45,
+    "max_text_length": 4815,
+    "total_characters": 1487836
+  },
+  "chunking": {
+    "total_chunks": 3000,
+    "avg_chunk_length": 495.94533333333334,
+    "min_chunk_length": 45,
+    "max_chunk_length": 4815,
+    "total_characters": 1487836,
+    "chunking_method": "keep_as_paragraph"
+  },
+  "triples": {
+    "total_triples": 20662,
+    "unique_subjects": 3072,
+    "unique_predicates": 4319,
+    "unique_objects": 11171,
+    "avg_confidence": 0.8500000000000001,
+    "most_common_predicates": [
+      [
+        "was",
+        751
+      ],
+      [
+        "won",
+        727
+      ],
+      [
+        "has won",
+        372
+      ],
+      [
+        "played for",
+        277
+      ],
+      [
+        "is located in",
+        183
+      ]
+    ],
+    "most_common_subjects": [
+      [
+        "Tổng thống",
+        180
+      ],
+      [
+        "Thảo My",
+        174
+      ],
+      [
+        "Queens Park Rangers",
+        174
+      ],
+      [
+        "chelsea",
+        160
+      ],
+      [
+        "Lionel Andrés Messi Cuccittini",
+        112
+      ]
+    ],
+    "qwen_triples": 0,
+    "gpt35_triples": 20662,
+    "extraction_stats": {
+      "hf_success": 0,
+      "hf_failed": 3000,
+      "gpt_success": 2950,
+      "gpt_failed": 0,
+      "total_chunks": 3000
+    },
+    "hf_success_rate": 0.0,
+    "gpt_fallback_rate": 0.9833333333333333
+  },
+  "synonyms": {
+    "total_synonym_pairs": 66140,
+    "avg_similarity": 0.8480691027318671,
+    "min_similarity": 0.8000001311302185,
+    "max_similarity": 0.999143123626709,
+    "unique_phrases_with_synonyms": 8761
+  },
+  "graph": {
+    "nodes": {
+      "Passage": 3000,
+      "Phrase": 13225
+    },
+    "edges": {
+      "RELATION": 20662,
+      "SYNONYM": 132280,
+      "CONTAINS": 24997
+    },
+    "total_nodes": 16225,
+    "total_edges": 177939,
+    "hipporag_style": true,
+    "canonical_mapping": false,
+    "surface_forms_preserved": true,
+    "meaningful_phrase_ids": true
+  },
+  "settings": {
+    "synonym_threshold": 0.8,
+    "clear_existing_graph": true,
+    "enable_gpt_fallback": true
+  }
+}

@@ -1,0 +1,16 @@
+services:
+  neo4j:
+    image: neo4j:latest
+    container_name: my-neo4j-graphrag
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    volumes:
+      - ./neo4j-data/data:/data
+      - ./neo4j-data/logs:/logs
+      - ./neo4j-data/import:/var/lib/neo4j/import
+      - ./neo4j-data/conf:/var/lib/neo4j/conf
+    environment:
+      - NEO4J_AUTH=neo4j/graphrag123
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+    restart: unless-stopped 

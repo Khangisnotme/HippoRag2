@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPDX - Memory-Augmented QA System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .header .info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #34495e;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .question-section {
+            margin-bottom: 30px;
+        }
+
+        .question-section label {
+            display: block;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .question-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            font-size: 1.1em;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.3s;
+        }
+
+        .question-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .settings-section {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setting-item label {
+            font-weight: 500;
+            color: #34495e;
+        }
+
+        .setting-item select {
+            padding: 8px 12px;
+            border: 2px solid #e0e6ed;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #ddd;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #3498db;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(26px);
+        }
+
+        .process-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .process-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .process-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #28a745;
+        }
+
+        .status-item.checking {
+            border-left-color: #ffc107;
+        }
+
+        .status-item.error {
+            border-left-color: #dc3545;
+        }
+
+        .status-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .status-text {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .processing-view {
+            display: none;
+        }
+
+        .processing-view.active {
+            display: block;
+        }
+
+        .pipeline-status {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .module-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 10px;
+            background: #f8f9fa;
+            transition: all 0.3s;
+        }
+
+        .module-item.active {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+
+        .module-item.completed {
+            background: #e8f5e8;
+            border-left: 4px solid #4caf50;
+        }
+
+        .module-icon {
+            font-size: 1.8em;
+            margin-right: 15px;
+            width: 40px;
+        }
+
+        .module-content {
+            flex: 1;
+        }
+
+        .module-title {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .module-status {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .module-time {
+            font-weight: 600;
+            color: #28a745;
+            margin-left: 10px;
+        }
+
+        .progress-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .cancel-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .results-view {
+            display: none;
+        }
+
+        .results-view.active {
+            display: block;
+        }
+
+        .answer-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .answer-content {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #28a745;
+            margin: 20px 0;
+        }
+
+        .answer-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .answer-metrics {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .metric-item {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .passages-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .passage-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .passage-item:first-child {
+            border-left-color: #ffd700;
+        }
+
+        .passage-item:nth-child(2) {
+            border-left-color: #c0c0c0;
+        }
+
+        .passage-item:nth-child(3) {
+            border-left-color: #cd7f32;
+        }
+
+        .passage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .passage-rank {
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .passage-score {
+            background: #3498db;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .passage-text {
+            color: #34495e;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .passage-meta {
+            font-size: 0.85em;
+            color: #6c757d;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .detailed-view {
+            display: none;
+        }
+
+        .detailed-view.active {
+            display: block;
+        }
+
+        .module-detail {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #e0e6ed;
+        }
+
+        .module-detail h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e6ed;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .detail-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            .header .info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .settings-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .answer-metrics {
+                justify-content: center;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎓 UTH Data Science Project Demo</h1>
+            <div class="subtitle">💡 PPDX: Memory-Augmented Information Extraction System</div>
+            <div class="info">
+                <div>👨‍🎓 Group: 5 (DL22CLC)</div>
+                <div>👩‍🏫 Supervisor:  Tran The Vinh</div>
+                <div>📅 Date: October 2025</div>
+            </div>
+        </div>
+
+        <!-- Main Interface -->
+        <div id="main-view" class="main-card">
+            <div class="question-section">
+                <label>💭 Ask your question:</label>
+                <textarea 
+                    id="question-input" 
+                    class="question-input" 
+                    placeholder="What are the health benefits of green apples?"
+                >What are the health benefits of green apples?</textarea>
+            </div>
+
+            <div class="settings-section">
+                <div class="setting-item">
+                    <label>Max Passages:</label>
+                    <select id="max-passages">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="15">15</option>
+                        <option value="20">20</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Enable Answer Generation:</label>
+                    <div id="answer-toggle" class="toggle-switch active"></div>
+                </div>
+            </div>
+
+            <button id="process-btn" class="process-btn">🔍 Process Question</button>
+
+            <div class="status-section">
+                <div id="neo4j-status" class="status-item checking">
+                    <div class="status-icon">🗃️</div>
+                    <div class="status-text">Neo4j Database</div>
+                    <div>Checking...</div>
+                </div>
+                <div id="vector-status" class="status-item checking">
+                    <div class="status-icon">🧠</div>
+                    <div class="status-text">Vector Database</div>
+                    <div>Checking...</div>
+                </div>
+                <div id="llm-status" class="status-item checking">
+                    <div class="status-icon">🤖</div>
+                    <div class="status-text">LLM Service</div>
+                    <div>Checking...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processing View -->
+        <div id="processing-view" class="processing-view">
+            <div class="pipeline-status">
+                <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">
+                    🔄 Processing Pipeline
+                </h2>
+                <div id="current-query" style="text-align: center; margin-bottom: 30px; font-style: italic; color: #6c757d;"></div>
+
+                <div id="module1" class="module-item">
+                    <div class="module-icon">📊</div>
+                    <div class="module-content">
+                        <div class="module-title">Module 1: Dual Retrieval</div>
+                        <div class="module-status">Waiting to start...</div>
+                    </div>
+                </div>
+
+                <div id="module2" class="module-item">
+                    <div class="module-icon">🤖</div>
+                    <div class="module-content">
+                        <div class="module-title">Module 2: LLM Triple Filtering</div>
+                        <div class="module-status">Waiting for Module 1...</div>
+                    </div>
+                </div>
+
+                <div id="module3" class="module-item">
+                    <div class="module-icon">🏆</div>
+                    <div class="module-content">
+                        <div class="module-title">Module 3: Passage Ranking</div>
+                        <div class="module-status">Waiting for Module 2...</div>
+                    </div>
+                </div>
+
+                <div id="module4" class="module-item">
+                    <div class="module-icon">🔗</div>
+                    <div class="module-content">
+                        <div class="module-title">Module 4: Context Expansion</div>
+                        <div class="module-status">Optional - Will run if enabled</div>
+                    </div>
+                </div>
+
+                <div id="module5" class="module-item">
+                    <div class="module-icon">💬</div>
+                    <div class="module-content">
+                        <div class="module-title">Module 5: Answer Generation</div>
+                        <div class="module-status">Waiting for previous modules...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div id="progress-text" class="progress-text">Starting processing...</div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <span id="elapsed-time">⏱️ Elapsed: 0s</span>
+                    <span style="margin: 0 20px;">|</span>
+                    <span id="estimated-time">🕐 Estimated: calculating...</span>
+                </div>
+                <button id="cancel-btn" class="cancel-btn">⏹️ Cancel Processing</button>
+            </div>
+        </div>
+
+        <!-- Results View -->
+        <div id="results-view" class="results-view">
+            <div class="answer-section">
+                <h2 style="color: #2c3e50; margin-bottom: 20px;">💬 AI Generated Answer</h2>
+                <div id="processing-time" style="text-align: center; color: #6c757d; margin-bottom: 20px;"></div>
+                
+                <div class="answer-content">
+                    <div id="answer-text" class="answer-text"></div>
+                    <div class="answer-metrics">
+                        <div class="metric-item">
+                            <div id="quality-score" class="metric-value">8.7</div>
+                            <div class="metric-label">Quality Score</div>
+                        </div>
+                        <div class="metric-item">
+                            <div id="confidence-score" class="metric-value">92%</div>
+                            <div class="metric-label">Confidence</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="passages-section">
+                <h2 style="color: #2c3e50; margin-bottom: 20px;">📄 Top Supporting Passages</h2>
+                <div id="passages-container"></div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="view-details-btn" class="action-btn btn-primary">📊 View Details</button>
+                <button id="ask-another-btn" class="action-btn btn-secondary">🔄 Ask Another</button>
+                <button id="save-result-btn" class="action-btn btn-success">💾 Save Result</button>
+            </div>
+        </div>
+
+        <!-- Detailed Analysis View -->
+        <div id="detailed-view" class="detailed-view">
+            <div class="main-card">
+                <h2 style="color: #2c3e50; margin-bottom: 30px; text-align: center;">📊 Detailed Analysis</h2>
+                
+                <div class="module-detail">
+                    <h3>🔍 Module 1: Dual Retrieval (2.3s)</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">BM25 Search Results</div>
+                            <div class="detail-value">15 passages</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Embedding Search Results</div>
+                            <div class="detail-value">12 passages</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Knowledge Triples</div>
+                            <div class="detail-value">23 triples</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Overlapping Results</div>
+                            <div class="detail-value">3 passages</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-detail">
+                    <h3>🤖 Module 2: LLM Filtering (2.1s)</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">LLM Provider</div>
+                            <div class="detail-value">GPT-4</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Triples Processed</div>
+                            <div class="detail-value">23 → 14</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Avg Relevance Score</div>
+                            <div class="detail-value">0.847</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">API Cost</div>
+                            <div class="detail-value">$0.023</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-detail">
+                    <h3>🏆 Module 3: Passage Ranking (1.4s)</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Retrieval Score Weight</div>
+                            <div class="detail-value">40%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Triple Support Weight</div>
+                            <div class="detail-value">35%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Context Weight</div>
+                            <div class="detail-value">25%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Final Rankings</div>
+                            <div class="detail-value">15 passages</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-detail">
+                    <h3>💬 Module 5: Answer Generation (3.9s)</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">LLM Provider</div>
+                            <div class="detail-value">GPT-4</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Prompt Tokens</div>
+                            <div class="detail-value">2,847</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Response Tokens</div>
+                            <div class="detail-value">312</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">API Cost</div>
+                            <div class="detail-value">$0.089</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="back-to-results-btn" class="action-btn btn-secondary">◀️ Back to Results</button>
+                    <button id="export-data-btn" class="action-btn btn-primary">📊 Export Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentView = 'main';
+        let currentQuery = '';
+        let processingInterval = null;
+        let elapsedTime = 0;
+        let answerGenEnabled = true;
+
+        // DOM elements
+        const questionInput = document.getElementById('question-input');
+        const maxPassagesSelect = document.getElementById('max-passages');
+        const answerToggle = document.getElementById('answer-toggle');
+        const processBtn = document.getElementById('process-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+
+        // Views
+        const mainView = document.getElementById('main-view');
+        const processingView = document.getElementById('processing-view');
+        const resultsView = document.getElementById('results-view');
+        const detailedView = document.getElementById('detailed-view');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupEventListeners();
+            checkSystemStatus();
+        });
+
+        function initializeApp() {
+            showView('main');
+        }
+
+        function setupEventListeners() {
+            // Toggle switch
+            answerToggle.addEventListener('click', function() {
+                answerGenEnabled = !answerGenEnabled;
+                answerToggle.classList.toggle('active', answerGenEnabled);
+            });
+
+            // Process button
+            processBtn.addEventListener('click', startProcessing);
+
+            // Cancel button
+            cancelBtn.addEventListener('click', cancelProcessing);
+
+            // Navigation buttons
+            document.getElementById('view-details-btn').addEventListener('click', () => showView('detailed'));
+            document.getElementById('ask-another-btn').addEventListener('click', () => showView('main'));
+            document.getElementById('save-result-btn').addEventListener('click', saveResults);
+            document.getElementById('back-to-results-btn').addEventListener('click', () => showView('results'));
+            document.getElementById('export-data-btn').addEventListener('click', exportData);
+        }
+
+        function showView(viewName) {
+            // Hide all views
+            mainView.classList.remove('active');
+            processingView.classList.remove('active');
+            resultsView.classList.remove('active');
+            detailedView.classList.remove('active');
+
+            mainView.style.display = 'none';
+            processingView.style.display = 'none';
+            resultsView.style.display = 'none';
+            detailedView.style.display = 'none';
+
+            // Show selected view
+            currentView = viewName;
+            switch(viewName) {
+                case 'main':
+                    mainView.style.display = 'block';
+                    break;
+                case 'processing':
+                    processingView.style.display = 'block';
+                    processingView.classList.add('active');
+                    break;
+                case 'results':
+                    resultsView.style.display = 'block';
+                    resultsView.classList.add('active');
+                    break;
+                case 'detailed':
+                    detailedView.style.display = 'block';
+                    detailedView.classList.add('active');
+                    break;
+            }
+        }
+
+        async function checkSystemStatus() {
+            const statusItems = [
+                { id: 'neo4j-status', delay: 1000 },
+                { id: 'vector-status', delay: 1500 },
+                { id: 'llm-status', delay: 2000 }
+            ];
+
+            for (const item of statusItems) {
+                setTimeout(() => {
+                    const element = document.getElementById(item.id);
+                    element.classList.remove('checking');
+                    element.classList.add('connected');
+                    element.querySelector('div:last-child').textContent = 'Connected';
+                }, item.delay);
+            }
+        }
+
+        function startProcessing() {
+            const query = questionInput.value.trim();
+            if (!query) {
+                alert('Please enter a question');
+                return;
+            }
+
+            currentQuery = query;
+            document.getElementById('current-query').textContent = `"${query}"`;
+            
+            showView('processing');
+            simulateProcessing();
+        }
+
+        function simulateProcessing() {
+            elapsedTime = 0;
+            let progress = 0;
+            const modules = ['module1', 'module2', 'module3', 'module4', 'module5'];
+            const moduleTimes = [2.3, 2.1, 1.4, 1.2, 3.9]; // seconds
+            let currentModule = 0;
+            let moduleStartTime = 0;
+
+            // Reset modules
+            modules.forEach(id => {
+                const element = document.getElementById(id);
+                element.classList.remove('active', 'completed');
+                element.querySelector('.module-status').textContent = 'Waiting...';
+            });
+
+            processingInterval = setInterval(() => {
+                elapsedTime += 0.1;
+                
+                // Update elapsed time
+                // Update elapsed time
+                document.getElementById('elapsed-time').textContent = `⏱️ Elapsed: ${elapsedTime.toFixed(1)}s`;
+                
+                // Calculate current module and progress
+                let totalTime = 0;
+                let currentModuleIndex = 0;
+                
+                for (let i = 0; i < moduleTimes.length; i++) {
+                    if (elapsedTime <= totalTime + moduleTimes[i]) {
+                        currentModuleIndex = i;
+                        break;
+                    }
+                    totalTime += moduleTimes[i];
+                    currentModuleIndex = i + 1;
+                }
+
+                // Update module states
+                modules.forEach((id, index) => {
+                    const element = document.getElementById(id);
+                    const statusElement = element.querySelector('.module-status');
+                    
+                    if (index < currentModuleIndex) {
+                        // Completed modules
+                        element.classList.remove('active');
+                        element.classList.add('completed');
+                        statusElement.innerHTML = `Completed <span class="module-time">(${moduleTimes[index]}s)</span>`;
+                    } else if (index === currentModuleIndex && currentModuleIndex < modules.length) {
+                        // Current active module
+                        element.classList.add('active');
+                        element.classList.remove('completed');
+                        
+                        if (index === 0) {
+                            statusElement.textContent = '📊 Retrieving passages and triples...';
+                        } else if (index === 1) {
+                            statusElement.textContent = '🤖 Analyzing relevance with GPT-4...';
+                        } else if (index === 2) {
+                            statusElement.textContent = '🏆 Ranking passages by support score...';
+                        } else if (index === 3) {
+                            statusElement.textContent = '🔗 Expanding context from knowledge graph...';
+                        } else if (index === 4) {
+                            statusElement.textContent = '💬 Generating comprehensive answer...';
+                        }
+                    } else {
+                        // Waiting modules
+                        element.classList.remove('active', 'completed');
+                        statusElement.textContent = 'Waiting for previous modules...';
+                    }
+                });
+
+                // Update progress bar
+                const totalDuration = moduleTimes.reduce((a, b) => a + b, 0);
+                progress = Math.min((elapsedTime / totalDuration) * 100, 100);
+                document.getElementById('progress-fill').style.width = progress + '%';
+                document.getElementById('progress-text').textContent = `Overall Progress: ${Math.round(progress)}%`;
+                
+                // Update estimated time
+                const remaining = Math.max(totalDuration - elapsedTime, 0);
+                document.getElementById('estimated-time').textContent = `🕐 Estimated: ${remaining.toFixed(1)}s`;
+
+                // Complete processing
+                if (elapsedTime >= totalDuration) {
+                    clearInterval(processingInterval);
+                    setTimeout(() => {
+                        showResults();
+                    }, 500);
+                }
+            }, 100);
+        }
+
+        function cancelProcessing() {
+            if (processingInterval) {
+                clearInterval(processingInterval);
+            }
+            showView('main');
+        }
+
+        function showResults() {
+            // Generate mock results
+            const mockResults = generateMockResults();
+            
+            // Update results view
+            document.getElementById('processing-time').textContent = `✅ Processing completed in ${mockResults.processingTime}s`;
+            document.getElementById('answer-text').innerHTML = mockResults.answer;
+            document.getElementById('quality-score').textContent = mockResults.qualityScore;
+            document.getElementById('confidence-score').textContent = mockResults.confidence;
+            
+            // Update passages
+            const passagesContainer = document.getElementById('passages-container');
+            passagesContainer.innerHTML = '';
+            
+            mockResults.passages.forEach((passage, index) => {
+                const passageElement = document.createElement('div');
+                passageElement.className = 'passage-item';
+                passageElement.innerHTML = `
+                    <div class="passage-header">
+                        <div class="passage-rank">${passage.rank} ${passage.medal}</div>
+                        <div class="passage-score">${passage.score}</div>
+                    </div>
+                    <div class="passage-text">${passage.text}</div>
+                    <div class="passage-meta">📍 ${passage.triples} supporting knowledge triples</div>
+                `;
+                passagesContainer.appendChild(passageElement);
+            });
+            
+            showView('results');
+        }
+
+        function generateMockResults() {
+            return {
+                processingTime: 9.7,
+                answer: `Green apples offer several health benefits:<br><br>
+                    🍎 <strong>Rich in Vitamin C:</strong> Boosts immune system and collagen production<br>
+                    🌾 <strong>High in Fiber:</strong> Improves digestion and helps maintain healthy cholesterol levels<br>
+                    🛡️ <strong>Antioxidants:</strong> Help fight free radicals and reduce inflammation<br>
+                    📉 <strong>Low Glycemic Index:</strong> Better blood sugar control compared to other fruits<br>
+                    🦷 <strong>Malic Acid:</strong> May help with oral health and natural teeth whitening<br>
+                    ❤️ <strong>Heart Health:</strong> Pectin fiber helps reduce bad cholesterol levels`,
+                qualityScore: '8.7/10',
+                confidence: '92%',
+                passages: [
+                    {
+                        rank: '🏆 #1',
+                        medal: '- Passage P089',
+                        score: '0.923',
+                        text: 'Green apples are rich in vitamin C and dietary fiber, making them excellent for immune system support and digestive health. The high fiber content helps regulate blood sugar levels and promotes satiety.',
+                        triples: 3
+                    },
+                    {
+                        rank: '🥈 #2',
+                        medal: '- Passage P156',
+                        score: '0.887',
+                        text: 'The antioxidants in apples, particularly quercetin and catechin, help reduce inflammation and protect cells from oxidative stress. These compounds are especially concentrated in the skin.',
+                        triples: 2
+                    },
+                    {
+                        rank: '🥉 #3',
+                        medal: '- Passage P047',
+                        score: '0.834',
+                        text: 'Fiber content in apples supports digestive health by promoting beneficial gut bacteria growth. The soluble fiber pectin helps lower cholesterol levels and may reduce the risk of heart disease.',
+                        triples: 4
+                    }
+                ]
+            };
+        }
+
+        function saveResults() {
+            const results = {
+                query: currentQuery,
+                timestamp: new Date().toISOString(),
+                answer: document.getElementById('answer-text').innerHTML,
+                qualityScore: document.getElementById('quality-score').textContent,
+                confidence: document.getElementById('confidence-score').textContent,
+                processingTime: document.getElementById('processing-time').textContent
+            };
+            
+            const dataStr = JSON.stringify(results, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ppdx-results-${Date.now()}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            alert('Results saved successfully!');
+        }
+
+        function exportData() {
+            const detailedData = {
+                query: currentQuery,
+                timestamp: new Date().toISOString(),
+                modules: {
+                    module1: {
+                        name: 'Dual Retrieval',
+                        time: '2.3s',
+                        bm25Results: 15,
+                        embeddingResults: 12,
+                        knowledgeTriples: 23,
+                        overlapping: 3
+                    },
+                    module2: {
+                        name: 'LLM Filtering',
+                        time: '2.1s',
+                        provider: 'GPT-4',
+                        processed: '23 → 14',
+                        avgRelevance: 0.847,
+                        apiCost: '$0.023'
+                    },
+                    module3: {
+                        name: 'Passage Ranking',
+                        time: '1.4s',
+                        retrievalWeight: '40%',
+                        tripleWeight: '35%',
+                        contextWeight: '25%',
+                        finalRankings: 15
+                    },
+                    module5: {
+                        name: 'Answer Generation',
+                        time: '3.9s',
+                        provider: 'GPT-4',
+                        promptTokens: 2847,
+                        responseTokens: 312,
+                        apiCost: '$0.089'
+                    }
+                },
+                performance: {
+                    totalTime: '9.7s',
+                    qualityScore: '8.7/10',
+                    confidence: '92%'
+                }
+            };
+            
+            const dataStr = JSON.stringify(detailedData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ppdx-detailed-analysis-${Date.now()}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            alert('Detailed analysis exported successfully!');
+        }
+
+        // Sample questions for testing
+        const sampleQuestions = [
+            "What are the health benefits of green apples?",
+            "How does machine learning improve healthcare outcomes?",
+            "What are the environmental impacts of renewable energy?",
+            "How can artificial intelligence help in education?",
+            "What are the benefits of regular exercise for mental health?"
+        ];
+
+        // Add sample question selector
+        function addSampleQuestionSelector() {
+            const mainCard = document.querySelector('.main-card');
+            const sampleSection = document.createElement('div');
+            sampleSection.style.marginBottom = '20px';
+            sampleSection.innerHTML = `
+                <div style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">
+                    💡 Try these sample questions:
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    ${sampleQuestions.map(q => `
+                        <button class="sample-question-btn" onclick="selectSampleQuestion('${q}')" 
+                                style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 8px 12px; 
+                                       border-radius: 6px; cursor: pointer; font-size: 0.9em; 
+                                       transition: all 0.3s;">
+                            ${q.length > 40 ? q.substring(0, 40) + '...' : q}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            
+            mainCard.insertBefore(sampleSection, mainCard.firstChild.nextSibling);
+        }
+
+        function selectSampleQuestion(question) {
+            questionInput.value = question;
+            
+            // Highlight selected button briefly
+            const buttons = document.querySelectorAll('.sample-question-btn');
+            buttons.forEach(btn => {
+                if (btn.textContent.includes(question.substring(0, 30))) {
+                    btn.style.background = '#e3f2fd';
+                    btn.style.borderColor = '#2196f3';
+                    setTimeout(() => {
+                        btn.style.background = '#f8f9fa';
+                        btn.style.borderColor = '#dee2e6';
+                    }, 1000);
+                }
+            });
+        }
+
+        // Add sample questions after DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(addSampleQuestionSelector, 100);
+        });
+    </script>
+</body>
+</html>

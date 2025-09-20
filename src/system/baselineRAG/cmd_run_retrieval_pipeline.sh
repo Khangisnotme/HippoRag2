@@ -1,0 +1,2 @@
+python run_retrieval_pipeline.py --input D:\GIT\ResearchProject_Memory-AugmentedAIAgents_GraduationProject\src\datasets\dataset_full\vimqa_processed\qa_pairs_vimqa_dev_300.xlsx --end_row 5
+python run_retrieval_and_generation_pipeline.py --input D:\GIT\ResearchProject_Memory-AugmentedAIAgents_GraduationProject\src\datasets\dataset_full\vimqa_processed\qa_pairs_vimqa_dev_300.xlsx --model Qwen/Qwen2.5-7B-Instruct --end_row 5

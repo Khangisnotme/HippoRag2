@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPDX - Memory-Augmented QA System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .header .info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #34495e;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .question-section {
+            margin-bottom: 30px;
+        }
+
+        .question-section label {
+            display: block;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .question-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            font-size: 1.1em;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.3s;
+        }
+
+        .question-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .settings-section {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setting-item label {
+            font-weight: 500;
+            color: #34495e;
+        }
+
+        .setting-item select {
+            padding: 8px 12px;
+            border: 2px solid #e0e6ed;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #ddd;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #3498db;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(26px);
+        }
+
+        .process-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .process-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .process-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #28a745;
+        }
+
+        .status-item.checking {
+            border-left-color: #ffc107;
+        }
+
+        .status-item.error {
+            border-left-color: #dc3545;
+        }
+
+        .status-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .status-text {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .processing-view {
+            display: none;
+        }
+
+        .processing-view.active {
+            display: block;
+        }
+
+        .pipeline-status {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .module-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 10px;
+            background: #f8f9fa;
+            transition: all 0.3s;
+        }
+
+        .module-item.active {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+
+        .module-item.completed {
+            background: #e8f5e8;
+            border-left: 4px solid #4caf50;
+        }
+
+        .module-icon {
+            font-size: 1.8em;
+            margin-right: 15px;
+            width: 40px;
+        }
+
+        .module-content {
+            flex: 1;
+        }
+
+        .module-title {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .module-status {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .module-time {
+            font-weight: 600;
+            color: #28a745;
+            margin-left: 10px;
+        }
+
+        .progress-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .cancel-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .results-view {
+            display: none;
+        }
+
+        .results-view.active {
+            display: block;
+        }
+
+        .answer-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .answer-content {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #28a745;
+            margin: 20px 0;
+        }
+
+        .answer-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .answer-metrics {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .metric-item {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .passages-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .passage-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .passage-item:first-child {
+            border-left-color: #ffd700;
+        }
+
+        .passage-item:nth-child(2) {
+            border-left-color: #c0c0c0;
+        }
+
+        .passage-item:nth-child(3) {
+            border-left-color: #cd7f32;
+        }
+
+        .passage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .passage-rank {
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .passage-score {
+            background: #3498db;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .passage-text {
+            color: #34495e;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .passage-meta {
+            font-size: 0.85em;
+            color: #6c757d;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .sample-questions {
+            margin-bottom: 20px;
+        }
+
+        .sample-question-btn {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+
+        .sample-question-btn:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .header .info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .settings-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .answer-metrics {
+                justify-content: center;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎓 HUST Graduation Thesis Demo</h1>
+            <div class="subtitle">💡 PPDX: Memory-Augmented Information Extraction System</div>
+            <div class="info">
+                <div>👨‍🎓 Student: Doan Ngoc Cuong (20210141)</div>
+                <div>👩‍🏫 Supervisor: Assoc. Prof. Nguyen Thi Kim Anh</div>
+                <div>📅 Date: June 2025</div>
+            </div>
+        </div>
+
+        <!-- Main Interface -->
+        <div id="main-view" class="main-card">
+            <!-- Sample Questions -->
+            <div class="sample-questions">
+                <div style="margin-bottom: 10px; font-weight: 600; color: #2c3e50;">
+                    💡 Try these sample questions:
+                </div>
+                <div id="sample-questions-container">
+                    <!-- Sample questions will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="question-section">
+                <label>💭 Ask your question:</label>
+                <textarea 
+                    id="question-input" 
+                    class="question-input" 
+                    placeholder="What are the health benefits of green apples?"
+                >What are the health benefits of green apples?</textarea>
+            </div>
+
+            <div class="settings-section">
+                <div class="setting-item">
+                    <label>Max Passages:</label>
+                    <select id="max-passages">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="15">15</option>
+                        <option value="20">20</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Enable Answer Generation:</label>
+                    <div id="answer-toggle" class="toggle-switch active"></div>
+                </div>
+                <div class="setting-item">
+                    <label>Enable Context Expansion:</label>
+                    <div id="expansion-toggle" class="toggle-switch"></div>
+                </div>
+            </div>
+
+            <button id="process-btn" class="process-btn">🔍 Process Question</button>
+
+            <div class="status-section">
+                <div id="neo4j-status" class="status-item checking">
+                    <div class="status-icon">🗃️</div>
+                    <div class="status-text">Neo4j Database</div>
+                    <div>Checking...</div>
+                </div>
+                <div id="vector-status" class="status-item checking">
+                    <div class="status-icon">🧠</div>
+                    <div class="status-text">Vector Database</div>
+                    <div>Checking...</div>
+                </div>
+                <div id="llm-status" class="status-item checking">
+                    <div class="status-icon">🤖</div>
+                    <div class="status-text">LLM Service</div>
+                    <div>Checking...</div>
+                </div>
+            </div>
+
+            <div id="error-container"></div>
+        </div>
+
+        <!-- Processing View -->
+        <div id="processing-view" class="processing-view">
+            <div class="pipeline-status">
+                <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">
+                    🔄 Processing Pipeline
+                </h2>
+                <div id="current-query" style="text-align: center; margin-bottom: 30px; font-style: italic; color: #6c757d;"></div>
+
+                <div id="module1" class="module-item">
+                    <div class="module-icon">📊</div>
+                    <div class="module-content">
+                        <div class="module-title">Module 1: Dual Retrieval</div>
+                        <div class="module-status">Waiting to start...</div>
+                    </div>
+                </div>
+
+                <div id="module2" class="module-item">
+                    <div class="module-icon">🤖</div>
+                    <div class="module-content">
+                        <div class="module-title">Module 2: LLM Triple Filtering</div>
+                        <div class="module-status">Waiting for Module 1...</div>
+                    </div>
+                </div>
+
+                <div id="module3" class="module-item">
+                    <div class="module-icon">🏆</div>
+                    <div class="module-content">
+                        <div class="module-title">Module 3: Passage Ranking</div>
+                        <div class="module-status">Waiting for Module 2...</div>
+                    </div>
+                </div>
+
+                <div id="module4" class="module-item">
+                    <div class="module-icon">🔗</div>
+                    <div class="module-content">
+                        <div class="module-title">Module 4: Context Expansion</div>
+                        <div class="module-status">Optional - Will run if enabled</div>
+                    </div>
+                </div>
+
+                <div id="module5" class="module-item">
+                    <div class="module-icon">💬</div>
+                    <div class="module-content">
+                        <div class="module-title">Module 5: Answer Generation</div>
+                        <div class="module-status">Waiting for previous modules...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div id="progress-text" class="progress-text">Starting processing...</div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <span id="elapsed-time">⏱️ Elapsed: 0s</span>
+                    <span style="margin: 0 20px;">|</span>
+                    <span id="estimated-time">🕐 Estimated: calculating...</span>
+                </div>
+                <button id="cancel-btn" class="cancel-btn">⏹️ Cancel Processing</button>
+            </div>
+        </div>
+
+        <!-- Results View -->
+        <div id="results-view" class="results-view">
+            <div class="answer-section">
+                <h2 style="color: #2c3e50; margin-bottom: 20px;">💬 AI Generated Answer</h2>
+                <div id="processing-time" style="text-align: center; color: #6c757d; margin-bottom: 20px;"></div>
+                
+                <div class="answer-content">
+                    <div id="answer-text" class="answer-text"></div>
+                    <div class="answer-metrics">
+                        <div class="metric-item">
+                            <div id="quality-score" class="metric-value">8.7</div>
+                            <div class="metric-label">Quality Score</div>
+                        </div>
+                        <div class="metric-item">
+                            <div id="confidence-score" class="metric-value">92%</div>
+                            <div class="metric-label">Confidence</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="passages-section">
+                <h2 style="color: #2c3e50; margin-bottom: 20px;">📄 Top Supporting Passages</h2>
+                <div id="passages-container"></div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="ask-another-btn" class="action-btn btn-secondary">🔄 Ask Another</button>
+                <button id="save-result-btn" class="action-btn btn-success">💾 Save Result</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentView = 'main';
+        let currentQuery = '';
+        let processingWebSocket = null;
+        let answerGenEnabled = true;
+        let contextExpansionEnabled = false;
+        let isProcessing = false;
+
+        // DOM elements
+        const questionInput = document.getElementById('question-input');
+        const maxPassagesSelect = document.getElementById('max-passages');
+        const answerToggle = document.getElementById('answer-toggle');
+        const expansionToggle = document.getElementById('expansion-toggle');
+        const processBtn = document.getElementById('process-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+
+        // Views
+        const mainView = document.getElementById('main-view');
+        const processingView = document.getElementById('processing-view');
+        const resultsView = document.getElementById('results-view');
+
+        // Sample questions
+        const sampleQuestions = [
+            "What are the health benefits of green apples?",
+            "How does machine learning improve healthcare outcomes?",
+            "What are the environmental impacts of renewable energy?",
+            "How can artificial intelligence help in education?",
+            "What are the benefits of regular exercise for mental health?"
+        ];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupEventListeners();
+            checkSystemStatus();
+            populateSampleQuestions();
+        });
+
+        function initializeApp() {
+            showView('main');
+        }
+
+        function setupEventListeners() {
+            // Toggle switches
+            answerToggle.addEventListener('click', function() {
+                answerGenEnabled = !answerGenEnabled;
+                answerToggle.classList.toggle('active', answerGenEnabled);
+            });
+
+            expansionToggle.addEventListener('click', function() {
+                contextExpansionEnabled = !contextExpansionEnabled;
+                expansionToggle.classList.toggle('active', contextExpansionEnabled);
+            });
+
+            // Process button
+            processBtn.addEventListener('click', startProcessing);
+
+            // Cancel button
+            cancelBtn.addEventListener('click', cancelProcessing);
+
+            // Navigation buttons
+            document.getElementById('ask-another-btn').addEventListener('click', () => showView('main'));
+            document.getElementById('save-result-btn').addEventListener('click', saveResults);
+        }
+
+        function populateSampleQuestions() {
+            const container = document.getElementById('sample-questions-container');
+            container.innerHTML = sampleQuestions.map(q => `
+                <button class="sample-question-btn" onclick="selectSampleQuestion('${q.replace(/'/g, "\\'")}')">
+                    ${q.length > 40 ? q.substring(0, 40) + '...' : q}
+                </button>
+            `).join('');
+        }
+
+        function selectSampleQuestion(question) {
+            questionInput.value = question;
+            
+            // Highlight selected button briefly
+            const buttons = document.querySelectorAll('.sample-question-btn');
+            buttons.forEach(btn => {
+                if (btn.textContent.includes(question.substring(0, 30))) {
+                    btn.style.background = '#e3f2fd';
+                    btn.style.borderColor = '#2196f3';
+                    setTimeout(() => {
+                        btn.style.background = '#f8f9fa';
+                        btn.style.borderColor = '#dee2e6';
+                    }, 1000);
+                }
+            });
+        }
+
+        function showView(viewName) {
+            // Hide all views
+            mainView.style.display = 'none';
+            processingView.style.display = 'none';
+            resultsView.style.display = 'none';
+
+            // Show selected view
+            currentView = viewName;
+            switch(viewName) {
+                case 'main':
+                    mainView.style.display = 'block';
+                    break;
+                case 'processing':
+                    processingView.style.display = 'block';
+                    break;
+                case 'results':
+                    resultsView.style.display = 'block';
+                    break;
+            }
+        }
+
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch('/api/health');
+                const status = await response.json();
+                
+                updateStatusItem('neo4j-status', status.neo4j);
+                updateStatusItem('vector-status', status.vector_db);
+                updateStatusItem('llm-status', status.llm_service);
+                
+            } catch (error) {
+                console.error('Failed to check system status:', error);
+                updateStatusItem('neo4j-status', 'error');
+                updateStatusItem('vector-status', 'error');
+                updateStatusItem('llm-status', 'error');
+            }
+        }
+
+        function updateStatusItem(elementId, status) {
+            const element = document.getElementById(elementId);
+            element.classList.remove('checking', 'error');
+            
+            if (status === 'connected' || status === 'ready' || status === 'available') {
+                element.classList.add('connected');
+                element.querySelector('div:last-child').textContent = 'Connected';
+            } else {
+                element.classList.add('error');
+                element.querySelector('div:last-child').textContent = 'Error';
+            }
+        }
+
+        async function startProcessing() {
+            const query = questionInput.value.trim();
+            if (!query) {
+                showError('Please enter a question');
+                return;
+            }
+
+            if (isProcessing) {
+                return;
+            }
+
+            currentQuery = query;
+            isProcessing = true;
+            processBtn.disabled = true;
+            document.getElementById('current-query').textContent = `"${query}"`;
+            
+            showView('processing');
+            
+            try {
+                // Try WebSocket first, fallback to HTTP
+                if (window.WebSocket) {
+                    await processWithWebSocket(query);
+                } else {
+                    await processWithHTTP(query);
+                }
+            } catch (error) {
+                console.error('Processing failed:', error);
+                showError('Processing failed: ' + error.message);
+                showView('main');
+            } finally {
+                isProcessing = false;
+                processBtn.disabled = false;
+            }
+        }
+
+        async function processWithWebSocket(query) {
+            return new Promise((resolve, reject) => {
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}/ws/process`;
+                
+                processingWebSocket = new WebSocket(wsUrl);
+                
+                processingWebSocket.onopen = () => {
+                    console.log('WebSocket connected');
+                    processingWebSocket.send(JSON.stringify({
+                        question: query,
+                        max_passages: parseInt(maxPassagesSelect.value),
+                        enable_answer_generation: answerGenEnabled,
+                        enable_context_expansion: contextExpansionEnabled
+                    }));
+                };
+                
+                processingWebSocket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    
+                    switch(data.type) {
+                        case 'start':
+                            resetModuleStates();
+                            break;
+                        case 'module_start':
+                            updateModuleStatus(data.module, 'active', data.message);
+                            break;
+                        case 'module_complete':
+                            updateModuleStatus(data.module, 'completed', `Completed (${data.time}s)`);
+                            updateProgress(data.progress || 0);
+                            break;
+                        case 'complete':
+                            displayResults(data.result);
+                            processingWebSocket.close();
+                            resolve();
+                            break;
+                        case 'error':
+                            showError(data.message);
+                            processingWebSocket.close();
+                            reject(new Error(data.message));
+                            break;
+                    }
+                };
+                
+                processingWebSocket.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    processingWebSocket.close();
+                    // Fallback to HTTP
+                    processWithHTTP(query).then(resolve).catch(reject);
+                };
+                
+                processingWebSocket.onclose = () => {
+                    console.log('WebSocket closed');
+                };
+            });
+        }
+
+        async function processWithHTTP(query) {
+            console.log('Using HTTP fallback');
+            
+            // Simulate processing updates
+            resetModuleStates();
+            simulateProcessingUpdates();
+            
+            try {
+                const response = await fetch('/api/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: query,
+                        max_passages: parseInt(maxPassagesSelect.value),
+                        enable_answer_generation: answerGenEnabled,
+                        enable_context_expansion: contextExpansionEnabled
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                displayResults(result);
+                
+            } catch (error) {
+                console.error('HTTP request failed:', error);
+                throw error;
+            }
+        }
+
+        function simulateProcessingUpdates() {
+            const modules = [
+                {id: 'module1', name: 'Dual Retrieval', time: 2.3},
+                {id: 'module2', name: 'LLM Triple Filtering', time: 2.1},
+                {id: 'module3', name: 'Passage Ranking', time: 1.4},
+                {id: 'module4', name: 'Context Expansion', time: 1.2},
+                {id: 'module5', name: 'Answer Generation', time: 3.9}
+            ];
+
+            let currentModule = 0;
+            let elapsedTime = 0;
+
+            function processNextModule() {
+                if (currentModule >= modules.length || !isProcessing) {
+                    updateProgress(100);
+                    return;
+                }
+
+                const module = modules[currentModule];
+                updateModuleStatus(module.id, 'active', `Processing ${module.name}...`);
+
+                setTimeout(() => {
+                    if (isProcessing) {
+                        updateModuleStatus(module.id, 'completed', `Completed (${module.time}s)`);
+                        elapsedTime += module.time;
+                        updateProgress(((currentModule + 1) / modules.length) * 100);
+                        
+                        document.getElementById('elapsed-time').textContent = `⏱️ Elapsed: ${elapsedTime.toFixed(1)}s`;
+                        
+                        currentModule++;
+                        processNextModule();
+                    }
+                }, module.time * 200); // Speed up for demo
+            }
+
+            processNextModule();
+        }
+
+        function resetModuleStates() {
+            const modules = ['module1', 'module2', 'module3', 'module4', 'module5'];
+            modules.forEach(id => {
+                const element = document.getElementById(id);
+                element.classList.remove('active', 'completed');
+                element.querySelector('.module-status').textContent = 'Waiting...';
+            });
+            updateProgress(0);
+        }
+
+        function updateModuleStatus(moduleId, status, message) {
+            const element = document.getElementById(moduleId);
+            element.classList.remove('active', 'completed');
+            
+            if (status === 'active') {
+                element.classList.add('active');
+            } else if (status === 'completed') {
+                element.classList.add('completed');
+            }
+            
+            element.querySelector('.module-status').textContent = message;
+        }
+
+        function updateProgress(percentage) {
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            
+            progressFill.style.width = percentage + '%';
+            progressText.textContent = `Overall Progress: ${Math.round(percentage)}%`;
+        }
+
+        function cancelProcessing() {
+            isProcessing = false;
+            processBtn.disabled = false;
+            
+            if (processingWebSocket) {
+                processingWebSocket.close();
+            }
+            
+            showView('main');
+        }
+
+        function displayResults(result) {
+            if (!result.success) {
+                showError(result.error || 'Processing failed');
+                showView('main');
+                return;
+            }
+
+            // Update processing time
+            document.getElementById('processing-time').textContent = 
+                `✅ Processing completed in ${result.processing_time?.toFixed(1) || 'unknown'}s`;
+
+            // Update answer
+            const answerText = document.getElementById('answer-text');
+            const qualityScore = document.getElementById('quality-score');
+            const confidenceScore = document.getElementById('confidence-score');
+
+            if (result.module5_results?.answer_details) {
+                const answer = result.module5_results.answer_details;
+                answerText.innerHTML = answer.ai_answer || 'No answer generated';
+                qualityScore.textContent = answer.quality_score?.toFixed(1) || 'N/A';
+                confidenceScore.textContent = answer.confidence_score ? 
+                    Math.round(answer.confidence_score) + '%' : 'N/A';
+            } else {
+                answerText.innerHTML = 'Answer generation not available in this response';
+                qualityScore.textContent = 'N/A';
+                confidenceScore.textContent = 'N/A';
+            }
+
+            // Update passages
+            const passagesContainer = document.getElementById('passages-container');
+            passagesContainer.innerHTML = '';
+
+            if (result.final_results?.final_passages) {
+                result.final_results.final_passages.forEach((passage, index) => {
+                    const medals = ['🏆', '🥈', '🥉'];
+                    const medal = medals[index] || '📄';
+                    
+                    const passageElement = document.createElement('div');
+                    passageElement.className = 'passage-item';
+                    passageElement.innerHTML = `
+                        <div class="passage-header">
+                            <div class="passage-rank">${medal} #${passage.rank || index + 1} - ${passage.passage_id}</div>
+                            <div class="passage-score">${passage.final_score?.toFixed(3) || 'N/A'}</div>
+                        </div>
+                        <div class="passage-text">${passage.text_preview || 'No preview available'}</div>
+                        <div class="passage-meta">📍 ${passage.supporting_triples_count || 0} supporting knowledge triples</div>
+                    `;
+                    passagesContainer.appendChild(passageElement);
+                });
+            } else {
+                passagesContainer.innerHTML = '<p>No passages available in this response</p>';
+            }
+
+            showView('results');
+        }
+
+        function showError(message) {
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.innerHTML = `
+                <div class="error-message">
+                    ❌ ${message}
+                </div>
+            `;
+            setTimeout(() => {
+                errorContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        function saveResults() {
+            const results = {
+                query: currentQuery,
+                timestamp: new Date().toISOString(),
+                answer: document.getElementById('answer-text').innerHTML,
+                quality_score: document.getElementById('quality-score').textContent,
+                confidence: document.getElementById('confidence-score').textContent,
+                processing_time: document.getElementById('processing-time').textContent
+            };
+            
+            const dataStr = JSON.stringify(results, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ppdx-results-${Date.now()}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            alert('Results saved successfully!');
+        }
+
+        // Global function for sample questions
+        window.selectSampleQuestion = selectSampleQuestion;
+    </script>
+</body>
+</html>
